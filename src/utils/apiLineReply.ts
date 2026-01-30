@@ -22,7 +22,6 @@ interface ReplyNotification {
     replyToken : string;
     message    : string;
     groupLineId   ?: string | null;
-    bgColor ?: string;
 }
 interface ReplyNotificationPostback {
     userId          : number;
@@ -30,7 +29,6 @@ interface ReplyNotificationPostback {
     type            : string;
     message         : string;
     replyToken      : string;
-    bgColor        ?: string;
 }
 interface ReplyNotificationPostbackTemp{
     userId          : number;
@@ -1063,8 +1061,7 @@ export const replyUserData = async ({
 
 export const replyNotification = async ({
     replyToken,
-    message,
-    bgColor = "#be1717"
+    message
 }: ReplyNotification) => {
     try {
         const requestData = {
@@ -1075,11 +1072,6 @@ export const replyNotification = async ({
                     altText : "แจ้งเตือน",
                     contents: {
                         type: "bubble",
-                        styles: {
-                            body: {
-                                backgroundColor: bgColor
-                            }
-                        },                       
                         body: {
                             type    : "box",
                             layout  : "vertical",
@@ -1091,7 +1083,7 @@ export const replyNotification = async ({
                                         {
                                             type      : "span",
                                             text      : "แจ้งเตือนเขตปลอดภัย",
-                                            color     : (bgColor === "#FFC107") ? "#000000" : "#faf1f1",
+                                            color     : "#FC0303",
                                             size      : "xl",
                                             weight    : "bold",
                                             decoration: "none"
@@ -1117,8 +1109,8 @@ export const replyNotification = async ({
                                     contents:[
                                         {
                                             type      : "span",
-                                            text      : `ค่าสีที่ได้รับคือ: ${bgColor}`,
-                                            color     : (bgColor === "#FFC107") ? "#000000" : "#faf1f1",
+                                            text      : message,
+                                            color     : "#555555",
                                             size      : "md",
                                             // decoration: "none",
                                             // wrap      : true
@@ -1151,7 +1143,6 @@ export const replyNotificationPostback = async ({
     type,
     message,
     replyToken,
-    bgColor = "#f6ab14"
     
 }: ReplyNotificationPostback ) => {
     try {
@@ -1163,11 +1154,6 @@ export const replyNotificationPostback = async ({
                     altText : "แจ้งเตือน",
                     contents: {
                         type: "bubble",
-                        styles: {
-                            body: {
-                                backgroundColor: bgColor
-                            }
-                        },
                         body: {
                             type    : "box",
                             layout  : "vertical",
@@ -1179,7 +1165,7 @@ export const replyNotificationPostback = async ({
                                         {
                                             type      : "span",
                                             text      : "แจ้งเตือนเขตปลอดภัย",
-                                            color     : (bgColor === "#FFC107") ? "#000000" : "#ffffff",
+                                            color     : "#FC0303",
                                             size      : "xl",
                                             weight    : "bold",
                                             decoration: "none"
@@ -1205,8 +1191,8 @@ export const replyNotificationPostback = async ({
                                     contents:[
                                         {
                                             type      : "span",
-                                            text      : `ค่าสีที่ได้รับคือ: ${bgColor}`,
-                                            color     : (bgColor === "#FFC107") ? "#000000" : "#ffffff",
+                                            text      : message,
+                                            color     : "#555555",
                                             size      : "md",
                                             // decoration: "none",
                                             // wrap      : true
@@ -1240,7 +1226,7 @@ export const replyNotificationPostback = async ({
                                         {
                                             type      : "span",
                                             text      : "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                                            color     : (bgColor === "#FFC107") ? "#000000" : "#ffffff",
+                                            color     : "#FC0303",
                                             size      : "md",
                                             // decoration: "none",
                                             // wrap      : true
@@ -1269,7 +1255,7 @@ export const replyNotificationPostback = async ({
 
 export const replyNotificationSOS = async ({
     replyToken,
-    message    
+    message
 }: ReplyNotification) => {
     try {
 
@@ -1608,7 +1594,7 @@ export const replyNotificationPostbackfall = async ({
                                     contents:[
                                         {
                                             type      : "span",
-                                            text      : `${message}`,
+                                            text      : message,
                                             color     : "#555555",
                                             size      : "md",
                                             // decoration: "none",
