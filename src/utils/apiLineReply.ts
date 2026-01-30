@@ -1077,7 +1077,7 @@ export const replyNotification = async ({
                         type: "bubble",
                         styles: {
                             body: {
-                                backgroundColor: bgColor
+                                backgroundcolor: bgColor
                             }
                         },
                         body: {
@@ -1165,7 +1165,7 @@ export const replyNotificationPostback = async ({
                         type: "bubble",
                         styles: {
                             body: {
-                                backgroundColor: bgColor
+                                backgroundcolor: bgColor
                             }
                         },
                         body: {
