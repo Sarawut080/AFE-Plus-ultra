@@ -12,11 +12,12 @@ interface Props {
     required?: boolean;
     icon?: any;
     disabled?: boolean;
+    readOnly?: boolean; // 🔥 เพิ่ม readOnly
     max?: number;
     // รับค่าสถานะ Error และ Success
     isInvalid?: boolean;
     errorMessage?: string;
-    isValid?: boolean; // 🔥 เพิ่มตัวนี้
+    isValid?: boolean;
 
     [key: string]: any;
 }
@@ -32,10 +33,11 @@ const InputLabel = forwardRef<HTMLInputElement, Props>((props, ref) => {
         required = false, 
         icon = null, 
         disabled = false, 
+        readOnly = false, // 🔥 รับค่า readOnly
         max = null, 
         isInvalid = false, 
         errorMessage = '',
-        isValid, // 🔥 ดึงค่า isValid มาใช้
+        isValid,
         ...rest 
     } = props
 
@@ -49,22 +51,25 @@ const InputLabel = forwardRef<HTMLInputElement, Props>((props, ref) => {
 
     return (
         <Form.Group className="mb-3">
-            <Form.Label htmlFor={id}>{label}</Form.Label>
+            <Form.Label htmlFor={id}>
+                {label} {required && <span className="text-danger">*</span>}
+            </Form.Label>
             <InputGroup hasValidation>
                 {icon && <InputGroup.Text>{icon}</InputGroup.Text>}
                 <Form.Control
                     ref={ref}
-                    className="mb-0" // ปรับ CSS นิดหน่อยเผื่อมันดัน layout
+                    className="mb-0"
                     id={id}
                     type={type}
                     placeholder={placeholder}
                     required={required}
                     disabled={disabled}
+                    readOnly={readOnly} // 🔥 เพิ่ม readOnly
                     defaultValue={defaultValue}
                     
                     // ส่วนควบคุมสี: แดง (Invalid) / เขียว (Valid)
                     isInvalid={isInvalid}
-                    isValid={isValid} // 🔥 ส่งค่าไปให้ Bootstrap
+                    isValid={isValid}
 
                     {...inputCustom}
                     {...rest}

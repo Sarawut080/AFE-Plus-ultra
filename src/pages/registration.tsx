@@ -2,7 +2,7 @@ import withCommonData from '@/lib/withCommonData';
 import { GetServerSideProps } from 'next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import ButtonState from '@/components/Button/ButtonState';
@@ -76,10 +76,53 @@ const Registration = () => {
 
     useEffect(() => {
         const auToken = router.query.auToken
-        if (auToken) {
-            onGetUserProfile(auToken as string)
-            onGetUserData(auToken as string)
+        if (auToken && typeof auToken === 'string') {
+            onGetUserProfile(auToken)
+            
+            // เรียกใช้ตรงๆ แทนการพึ่ง function
+            const fetchUserData = async () => {
+                try {
+                    const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`);
+                    if (responseUser.data?.data) {
+                        const userData = responseUser.data.data;
+                        setDataUser({ isLogin: false, data: userData });
+                        
+                        reset({
+                            users_fname: userData.users_fname,
+                            users_sname: userData.users_sname,
+                            users_pin: userData.users_pin,
+                            users_number: userData.users_number,
+                            users_moo: userData.users_moo,
+                            users_road: userData.users_road,
+                            users_tubon: userData.users_tubon,
+                            users_amphur: userData.users_amphur,
+                            users_province: userData.users_province,
+                            users_postcode: userData.users_postcode,
+                            users_tel1: userData.users_tel1,
+                        });
+
+                        // Set initial address values for dropdown
+                        if (userData.users_province && userData.users_amphur && userData.users_tubon) {
+                            actions.setInitialValues(
+                                userData.users_province,
+                                userData.users_amphur,
+                                userData.users_tubon,
+                                userData.users_postcode
+                            );
+                        }
+
+                    } else {
+                        setDataUser({ isLogin: false, data: null })
+                    }
+                } catch (error) {
+                    setDataUser({ isLogin: false, data: null })
+                    setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
+                }
+            };
+            
+            fetchUserData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query.auToken])
 
     const onGetUserProfile = async (auToken: string) => {
@@ -114,7 +157,7 @@ const Registration = () => {
                     users_tel1: userData.users_tel1,
                 });
 
-                // 🔥 Set initial address values for dropdown
+                // Set initial address values for dropdown
                 if (userData.users_province && userData.users_amphur && userData.users_tubon) {
                     actions.setInitialValues(
                         userData.users_province,

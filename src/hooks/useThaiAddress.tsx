@@ -1,12 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
 
+// --- Type Definitions ---
+interface SubDistrict {
+  id: number;
+  name_th: string;
+  name_en: string;
+  zip_code: string;
+}
+
+interface District {
+  id: number;
+  name_th: string;
+  name_en: string;
+  sub_districts?: SubDistrict[];
+}
+
+interface Province {
+  id: number;
+  name_th: string;
+  name_en: string;
+  districts?: District[];
+}
+
 // --- Utility Functions ---
-const sortByName = (list = []) =>
+const sortByName = <T extends { name_th?: string }>(list: T[] = []): T[] =>
   [...list].sort((a, b) =>
     (a.name_th || "").localeCompare(b.name_th || "", "th")
   );
 
-const getLabel = (item) => {
+const getLabel = (item: Province | District | SubDistrict | null): string => {
   if (!item) return "";
   const { name_th, name_en } = item;
   return name_th && name_en ? `${name_th} — ${name_en}` : name_th || name_en;
@@ -14,9 +36,9 @@ const getLabel = (item) => {
 
 // --- Custom Hook (Logic Layer) ---
 export const useThaiAddress = () => {
-  const [provinces, setProvinces] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
   const [selected, setSelected] = useState({
     provinceId: "",
@@ -48,34 +70,34 @@ export const useThaiAddress = () => {
   }, []);
 
   // Derived Lists
-  const districts = useMemo(() => {
+  const districts = useMemo<District[]>(() => {
     const prov = provinces.find((p) => p.id === Number(selected.provinceId));
-    return sortByName(prov?.districts);
+    return sortByName(prov?.districts || []);
   }, [provinces, selected.provinceId]);
 
-  const subDistricts = useMemo(() => {
+  const subDistricts = useMemo<SubDistrict[]>(() => {
     const dist = districts.find((d) => d.id === Number(selected.districtId));
-    return sortByName(dist?.sub_districts);
+    return sortByName(dist?.sub_districts || []);
   }, [districts, selected.districtId]);
 
   // Get names by ID
-  const getProvinceName = (id) => {
+  const getProvinceName = (id: string | number): string => {
     const prov = provinces.find((p) => p.id === Number(id));
     return prov?.name_th || "";
   };
 
-  const getDistrictName = (id) => {
+  const getDistrictName = (id: string | number): string => {
     const dist = districts.find((d) => d.id === Number(id));
     return dist?.name_th || "";
   };
 
-  const getSubDistrictName = (id) => {
+  const getSubDistrictName = (id: string | number): string => {
     const subDist = subDistricts.find((s) => s.id === Number(id));
     return subDist?.name_th || "";
   };
 
   // Handlers
-  const setProvince = (id) => {
+  const setProvince = (id: string) => {
     setSelected({
       provinceId: id,
       districtId: "",
@@ -84,7 +106,7 @@ export const useThaiAddress = () => {
     });
   };
 
-  const setDistrict = (id) => {
+  const setDistrict = (id: string) => {
     setSelected((prev) => ({
       ...prev,
       districtId: id,
@@ -93,7 +115,7 @@ export const useThaiAddress = () => {
     }));
   };
 
-  const setSubDistrict = (id) => {
+  const setSubDistrict = (id: string) => {
     const subDist = subDistricts.find((s) => s.id === Number(id));
     setSelected((prev) => ({
       ...prev,
@@ -111,7 +133,7 @@ export const useThaiAddress = () => {
     });
 
   // Set initial values (for editing existing data)
-  const setInitialValues = (province, district, subDistrict, zipCode) => {
+  const setInitialValues = (province: string, district: string, subDistrict: string, zipCode?: string) => {
     // Find province ID by name
     const prov = provinces.find((p) => p.name_th === province);
     if (!prov) return;

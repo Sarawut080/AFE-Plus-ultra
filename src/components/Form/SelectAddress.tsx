@@ -1,11 +1,17 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 
+interface AddressItem {
+  id: number;
+  name_th: string;
+  name_en: string;
+}
+
 interface SelectAddressProps {
   label: string;
   id: string;
   value: string;
-  options: any[];
+  options: AddressItem[];
   onChange: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
@@ -13,7 +19,7 @@ interface SelectAddressProps {
   errorMessage?: string;
   isValid?: boolean;
   required?: boolean;
-  getLabel: (item: any) => string;
+  getLabel: (item: AddressItem) => string;
 }
 
 const SelectAddress: React.FC<SelectAddressProps> = ({
