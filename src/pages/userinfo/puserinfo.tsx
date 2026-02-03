@@ -491,8 +491,6 @@ const Puserinfo = () => {
                         type="tel"
                         max={10}
                         {...register("takecare_tel1")}
-                        isInvalid={!!errors.takecare_tel1}
-                        errorMessage={errors.takecare_tel1?.message}
                         isValid={isFieldValid("takecare_tel1")}                        
                     />
 
