@@ -5,7 +5,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 const initialState = {
     alert: {
         show      : false,
-        title     : 'SEPAW',
+        title     : 'AFE+',
         message   : '',
         redirectTo: ''
     },

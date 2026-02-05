@@ -487,9 +487,9 @@ const Registration = () => {
                     />
                     
                     <InputLabel 
-                        label="เบอร์โทรศัพท์" 
+                        label=" เบอร์โทรศัพท์มือถือ" 
                         id="users_tel1" 
-                        placeholder="กรอกเบอร์โทรศัพท์" 
+                        placeholder="กรอกเบอร์โทรศัพท์มือถือ" 
                         type="tel" 
                         max={10}
                         disabled={!!dataUser.data} 
@@ -548,10 +548,10 @@ const Registration = () => {
             {/* ✅ Modal ยืนยันการบันทึก - ลบปุ่ม X แล้ว */}
             <Modal show={confirmShow} centered onHide={onCancelSubmit}>
                 <Modal.Header className="py-2">
-                    <h5 className="m-0">SEPAW</h5>
+                    <h5 className="m-0">ยืนยันการบันทึกข้อมูล AFE+</h5>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>ยืนยันการบันทึกข้อมูลหรือไม่</p>
+                    <p>โปรดตรวจสอบความถูกต้องของข้อมูลก่อนยืนยันการบันทึกเข้าสู่ระบบ</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" size="lg" className="px-4" onClick={onCancelSubmit}>

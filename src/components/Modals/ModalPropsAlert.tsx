@@ -24,7 +24,7 @@ const ModalPropsAlert = () => {
         <>
             <Modal show={show} centered onHide={() => handleClose()}>
                 <Modal.Header className="py-2">
-                    <h5 className="m-0">{'SEPAW'}</h5>
+                    <h5 className="m-0">{'AFE+'}</h5>
                     <button type="button" className="btn outline" style={{ fontSize: 20 }} onClick={() => handleClose()}>
                         <i className="fa-solid fa-xmark"></i>
                     </button>

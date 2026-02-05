@@ -15,7 +15,7 @@ export const phoneRule = z
     const trimmed = val.trim();
     if (trimmed === "") return true;
     return trimmed.length === 10;
-  }, "เบอร์โทรศัพท์ต้องมี 10 หลัก");
+  }, "เบอร์โทรศัพท์มือถือต้องมี 10 หลัก");
 
 export const homePhoneRule = z
   .string()

@@ -653,7 +653,7 @@ export const replyLocation = async ({
                                                 : {
                                                     type: 'message',
                                                     label: 'โทร',
-                                                    text: 'ไม่มีข้อมูลเบอร์โทรศัพท์'
+                                                    text: 'ไม่มีข้อมูลเบอร์โทรศัพท์ของผู้มีภาวะพึ่งพิง'
                                                 }
                                         },
 
@@ -1035,7 +1035,7 @@ export const replyUserData = async ({
                                         layoutBoxBaseline("อำเภอ", `${userData.users_amphur || '-'}`),
                                         layoutBoxBaseline("จังหวัด", `${userData.users_province || '-'}`),
                                         layoutBoxBaseline("รหัสไปรษณีย์", `${userData.users_postcode || '-'}`),
-                                        layoutBoxBaseline("เบอร์โทรศัพท์", `${userData.users_tel1 || '-'}`),
+                                        layoutBoxBaseline("เบอร์โทรศัพท์มือถือ", `${userData.users_tel1 || '-'}`),
                                         //layoutBoxBaseline("LINE ID", userData.users_line_id),
                                     ]
 
