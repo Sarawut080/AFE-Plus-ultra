@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
-import { replyNotification, replyNotificationPostback } from '@/utils/apiLineReply';
+import { getFlexTemplate, pushFlexMessage } from '@/utils/apiLineReply';
 import moment from 'moment';
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
@@ -70,6 +70,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         locat_noti_status: 1,
       };
 
+      const previousStatus = latest ? Number(latest.locat_status) : null;
+
       // ถ้ามีแถวเดิม -> update ด้วย location_id ที่ถูกต้อง, ถ้าไม่มีก็ create
       let savedLocation;
       if (latest) {
@@ -81,12 +83,12 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         savedLocation = await prisma.location.create({ data: dataPayload });
       }
 
-      // ถ้าสถานะเป็น 0 ไม่ต้องแจ้งเตือน
-      if (calculatedStatus === 0) {
+      // ส่งแจ้งเตือนเฉพาะเมื่อสถานะเปลี่ยน
+      if (previousStatus !== null && calculatedStatus === previousStatus) {
         return res.status(200).json({ message: 'success', data: savedLocation });
       }
 
-      // แจ้งเตือน (เหมือนเดิม)
+      // แจ้งเตือน (Flex Message)
       const user = await prisma.users.findFirst({ where: { users_id: Number(uId) } });
       const takecareperson = await prisma.takecareperson.findFirst({
         where: {
@@ -99,23 +101,28 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
       if (user && takecareperson) {
         const replyToken = user.users_line_id || '';
 
-        if (calculatedStatus === 3) {
-          const warningMessage = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nเข้าใกล้เขตปลอดภัย ชั้นที่ 2 แล้ว`;
-          if (replyToken) await replyNotification({ replyToken, message: warningMessage });
-        } else if (calculatedStatus === 1) {
-          const message = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nออกนอกเขตปลอดภัย ชั้นที่ 1 แล้ว`;
-          if (replyToken) await replyNotification({ replyToken, message });
-        } else if (calculatedStatus === 2) {
-          const postbackMessage = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nออกนอกเขตปลอดภัย ชั้นที่ 2 แล้ว`;
-          if (replyToken) {
-            await replyNotificationPostback({
-              userId: Number(uId),
-              takecarepersonId: Number(takecare_id),
-              type: 'safezone',
-              message: postbackMessage,
-              replyToken,
-            });
-          }
+        if (replyToken) {
+          const timeText = moment().format('DD/MM/YYYY HH:mm');
+          const name = `${user.users_fname} ${user.users_sname}`;
+          const postbackData =
+            calculatedStatus === 2
+              ? `userLineId=${replyToken}&takecarepersonId=${Number(takecare_id)}&type=safezone`
+              : undefined;
+
+          const contents = getFlexTemplate(
+            calculatedStatus,
+            name,
+            String(latitude),
+            String(longitude),
+            timeText,
+            postbackData
+          );
+
+          await pushFlexMessage({
+            replyToken,
+            altText: 'แจ้งเตือน Safezone',
+            contents,
+          });
         }
       }
 

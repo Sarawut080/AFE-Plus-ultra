@@ -23,6 +23,11 @@ interface ReplyNotification {
     message: string;
     groupLineId?: string | null;
 }
+interface ReplyFlexMessage {
+    replyToken: string;
+    altText: string;
+    contents: any;
+}
 interface ReplyNotificationPostback {
     userId: number;
     takecarepersonId: number;
@@ -173,6 +178,85 @@ const kpiBox = (label: string, value: string, unit: string, color: string) => ({
         { type: 'text', text: unit, size: 'xs', color: '#6B7280' }
     ]
 });
+
+const SAFEZONE_STATUS_CONFIG: Record<number, { color: string; title: string; detail: string }> = {
+    0: { color: '#22C55E', title: '✅ ปลอดภัยแล้ว', detail: 'กลับเข้าสู่เขตปลอดภัย' },
+    1: { color: '#FFA500', title: '⚠️ แจ้งเตือนระดับ 1', detail: 'ออกนอกเขตปลอดภัยชั้นที่ 1' },
+    3: { color: '#FF8800', title: '🟠 เฝ้าระวังระดับ 2', detail: 'กำลังเข้าใกล้ขอบเขตชั้นที่ 2' },
+    2: { color: '#FF0000', title: '🚨 อันตรายสูงสุด!', detail: 'ออกนอกเขตปลอดภัยชั้นที่ 2' },
+};
+
+export const getFlexTemplate = (
+    status: number,
+    name: string,
+    latitude: string,
+    longitude: string,
+    timeText: string,
+    postbackData?: string
+) => {
+    const config = SAFEZONE_STATUS_CONFIG[status] || SAFEZONE_STATUS_CONFIG[2];
+    const contents: any[] = [
+        {
+            type: 'text',
+            text: config.detail,
+            size: 'sm',
+            color: '#666666',
+            wrap: true,
+        },
+        { type: 'separator', margin: 'md' },
+        {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'md',
+            spacing: 'sm',
+            contents: [
+                baseline('ชื่อผู้สูงอายุ', name),
+                baseline('พิกัดปัจจุบัน', `${latitude}, ${longitude}`),
+                baseline('เวลาแจ้งเตือน', timeText),
+            ],
+        },
+    ];
+
+    if (postbackData) {
+        contents.push({
+            type: 'button',
+            style: 'primary',
+            height: 'sm',
+            margin: 'xxl',
+            action: {
+                type: 'postback',
+                label: 'ส่งความช่วยเหลือเพิ่มเติม',
+                data: postbackData,
+            },
+        });
+    }
+
+    return {
+        type: 'bubble',
+        header: {
+            type: 'box',
+            layout: 'vertical',
+            backgroundColor: config.color,
+            paddingAll: '12px',
+            contents: [
+                {
+                    type: 'text',
+                    text: config.title,
+                    color: '#FFFFFF',
+                    size: 'lg',
+                    weight: 'bold',
+                    wrap: true,
+                },
+            ],
+        },
+        body: {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'sm',
+            contents,
+        },
+    };
+};
 
 export const getUserProfile = async (userId: string) => {
     try {
@@ -1790,6 +1874,32 @@ export const replyNotificationPostbackHeart = async ({
             ],
         };
         await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers: LINE_HEADER });
+    } catch (error) {
+        if (error instanceof Error) {
+            console.log(error.message);
+        }
+    }
+}
+
+export const pushFlexMessage = async ({
+    replyToken,
+    altText,
+    contents
+}: ReplyFlexMessage) => {
+    try {
+        const requestData = {
+            to: replyToken,
+            messages: [
+                {
+                    type: 'flex',
+                    altText,
+                    contents,
+                },
+            ],
+        };
+
+        const response = await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers: LINE_HEADER });
+        return response.data;
     } catch (error) {
         if (error instanceof Error) {
             console.log(error.message);
