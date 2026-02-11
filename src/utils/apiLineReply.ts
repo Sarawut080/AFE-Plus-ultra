@@ -220,7 +220,7 @@ export const getFlexTemplate = (
     if (postbackData) {
         contents.push({
             type: 'button',
-            style: 'primary',
+            color: '#FF0000',
             height: 'sm',
             margin: 'xxl',
             action: {
