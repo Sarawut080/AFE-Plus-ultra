@@ -1178,7 +1178,7 @@ export const replyNotification = async ({
                                         {
                                             type: "span",
                                             text: "สถานะเคส",
-                                            color: "#ffffff",
+                                            color: "#1976D2",
                                             size: "xl",
                                             weight: "bold",
                                             decoration: "none"
@@ -1262,7 +1262,7 @@ export const replyNotificationPostback = async ({
                                         {
                                             type: "span",
                                             text: "สถานะเคส",
-                                            color: "#ffffff",
+                                            color: "#1976D2",
                                             size: "xl",
                                             weight: "bold",
                                             decoration: "none"
