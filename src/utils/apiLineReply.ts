@@ -208,7 +208,8 @@ export const getFlexTemplate = (
         { type: 'separator', margin: 'md' },
         {
             type: 'box',
-            layout: 'vertical',
+            layout: 'baseline',
+            // layout: 'vertical',
             margin: 'md',
             spacing: 'sm',
             contents: [
