@@ -690,7 +690,8 @@ export const replyLocation = async ({
                         type: 'bubble',
                         body: {
                             type: 'box',
-                            layout: 'vertical',
+                            // layout: 'vertical',
+                            layout: 'baseline',
                             paddingAll: '16px',
                             spacing: '12px',
                             contents: [
@@ -703,7 +704,8 @@ export const replyLocation = async ({
                                 },
                                 {
                                     type: 'box',
-                                    layout: 'vertical',
+                                    // layout: 'vertical',
+                                    layout: 'baseline',
                                     spacing: '6px',
                                     contents: [
                                         baseline('ชื่อ-สกุล', `${userTakecarepersonData.takecare_fname} ${userTakecarepersonData.takecare_sname}`),
