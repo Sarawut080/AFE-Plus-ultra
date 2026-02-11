@@ -133,11 +133,10 @@ interface ReplyLocationData {
 // helper ทำแถวแบบ baseline (label : value) และรองรับกำหนดสี value
 const baseline = (label: string, value: string, valueColor?: string) => ({
     type: 'box',
-    layout: 'vertical',
-    alignItems: 'flex-start',
+    layout: 'baseline',
     contents: [
-        { type: 'text', text: label, size: 'sm', color: '#555555', wrap: true, align: 'start' },
-        { type: 'text', text: value, size: 'sm', color: valueColor || '#111111', wrap: true, align: 'start' }
+        { type: 'text', text: label, size: 'sm', color: '#555555', flex: 3, wrap: true },
+        { type: 'text', text: value, size: 'sm', color: valueColor || '#111111', flex: 5, wrap: true }
     ]
 });
 const layoutBoxBaseline = (label: string, text: string, flex1 = 2, flex2 = 5) => {
@@ -200,20 +199,18 @@ export const getFlexTemplate = (
         {
             type: 'text',
             text: config.detail,
-            size: 'md',
-            color: '#000000',
+            size: 'sm',
+            color: '#666666',
             wrap: true,
-            align: 'center',
         },
         { type: 'separator', margin: 'md' },
         {
             type: 'box',
-            layout: 'baseline',
-            // layout: 'vertical',
+            layout: 'vertical',
             margin: 'md',
             spacing: 'sm',
             contents: [
-                baseline('ชื่อผู้มีภาวะพึงพิง', name),
+                baseline('ชื่อผู้มีภาวะพึ่งพิง', name),
                 baseline('พิกัดปัจจุบัน', `${latitude}, ${longitude}`),
                 baseline('เวลาแจ้งเตือน', timeText),
             ],
@@ -249,7 +246,6 @@ export const getFlexTemplate = (
                     size: 'lg',
                     weight: 'bold',
                     wrap: true,
-                    align: 'center',
                 },
             ],
         },
@@ -690,8 +686,7 @@ export const replyLocation = async ({
                         type: 'bubble',
                         body: {
                             type: 'box',
-                            // layout: 'vertical',
-                            layout: 'baseline',
+                            layout: 'vertical',
                             paddingAll: '16px',
                             spacing: '12px',
                             contents: [
@@ -704,8 +699,7 @@ export const replyLocation = async ({
                                 },
                                 {
                                     type: 'box',
-                                    // layout: 'vertical',
-                                    layout: 'baseline',
+                                    layout: 'vertical',
                                     spacing: '6px',
                                     contents: [
                                         baseline('ชื่อ-สกุล', `${userTakecarepersonData.takecare_fname} ${userTakecarepersonData.takecare_sname}`),
@@ -1183,8 +1177,8 @@ export const replyNotification = async ({
                                     contents: [
                                         {
                                             type: "span",
-                                            text: "สถานะเคส",
-                                            color: "#1976D2",
+                                            text: "แจ้งเตือนเขตปลอดภัย",
+                                            color: "#FC0303",
                                             size: "xl",
                                             weight: "bold",
                                             decoration: "none"
