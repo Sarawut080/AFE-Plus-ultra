@@ -1,7 +1,6 @@
 ﻿import axios from 'axios';
 import moment from 'moment';
 import prisma from '@/lib/prisma';
-import { colors } from 'react-select/dist/declarations/src/theme';
 const WEB_API = process.env.WEB_API_URL;
 const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message/reply';
 const LINE_PUSH_MESSAGING_API = 'https://api.line.me/v2/bot/message/push';
@@ -222,7 +221,6 @@ export const getFlexTemplate = (
         contents.push({
             type: 'button',
             style: 'primary',
-            colors: '#ff0000',
             height: 'xl',
             margin: 'xxl',
             action: {
