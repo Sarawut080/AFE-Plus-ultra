@@ -328,7 +328,7 @@ export const getFlexTemplate = (
                     {
                         type: "span",
                         text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                        color: "#484848",
+                        color: "#ff0000",
                         size: "md",
                         // decoration: "none",
                         // wrap      : true
@@ -799,7 +799,7 @@ export const replyLocation = async ({
                             contents: [
                                 {
                                     type: 'text',
-                                    text: 'ตำแหน่งปัจจุบัน',
+                                    text: 'ข้อมูลผู้มีภาวะพึ่งพิง',
                                     color: '#111111',
                                     size: 'xl',
                                     weight: 'bold'
