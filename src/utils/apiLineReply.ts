@@ -185,6 +185,83 @@ const SAFEZONE_STATUS_CONFIG: Record<number, { color: string; title: string; det
     3: { color: '#FF8800', title: '🟠 เฝ้าระวังระดับ 2', detail: 'กำลังเข้าใกล้ขอบเขตชั้นที่ 2' },
     2: { color: '#FF0000', title: '🚨 อันตรายสูงสุด!', detail: 'ออกนอกเขตปลอดภัยชั้นที่ 2' },
 };
+const RED_ALERT_HEADER_COLOR = '#FF0000';
+const CONSENT_NOTE_TEXT = '*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง';
+
+const getRedAlertTemplate = ({
+    title,
+    message,
+    postbackData,
+    showConsentNote = false,
+}: {
+    title: string;
+    message: string;
+    postbackData?: string;
+    showConsentNote?: boolean;
+}) => {
+    const bodyContents: any[] = [
+        {
+            type: 'text',
+            text: message,
+            wrap: true,
+            size: 'md',
+            color: '#555555',
+        },
+    ];
+
+    if (postbackData) {
+        bodyContents.push({
+            type: 'button',
+            style: 'primary',
+            height: 'sm',
+            margin: 'xxl',
+            color: RED_ALERT_HEADER_COLOR,
+            action: {
+                type: 'postback',
+                label: 'ส่งขอความช่วยเหลือเพิ่มเติม',
+                data: postbackData,
+            },
+        });
+    }
+
+    if (showConsentNote) {
+        bodyContents.push({
+            type: 'text',
+            wrap: true,
+            lineSpacing: '5px',
+            margin: 'md',
+            text: CONSENT_NOTE_TEXT,
+            color: '#484848',
+            size: 'md',
+        });
+    }
+
+    return {
+        type: 'bubble',
+        header: {
+            type: 'box',
+            layout: 'vertical',
+            backgroundColor: RED_ALERT_HEADER_COLOR,
+            paddingAll: '12px',
+            contents: [
+                {
+                    type: 'text',
+                    text: title,
+                    color: '#FFFFFF',
+                    size: 'lg',
+                    weight: 'bold',
+                    wrap: true,
+                },
+            ],
+        },
+        body: {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'sm',
+            contents: bodyContents,
+        },
+    };
+};
 
 export const getFlexTemplate = (
     status: number,
@@ -1383,6 +1460,10 @@ export const replyNotificationSOS = async ({
     message
 }: ReplyNotification) => {
     try {
+        const contents = getRedAlertTemplate({
+            title: 'แจ้งเตือนฉุกเฉิน',
+            message,
+        });
 
         const requestData = {
             to: replyToken,
@@ -1390,62 +1471,7 @@ export const replyNotificationSOS = async ({
                 {
                     type: "flex",
                     altText: "แจ้งเตือน",
-                    contents: {
-                        type: "bubble",
-                        body: {
-                            type: "box",
-                            layout: "vertical",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "แจ้งเตือนฉุกเฉิน",
-                                            color: "#FC0303",
-                                            size: "xl",
-                                            weight: "bold",
-                                            decoration: "none"
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xxl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "separator",
-                                    margin: "md"
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: message,
-                                            color: "#555555",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
+                    contents
                 }
             ],
         };
@@ -1559,102 +1585,20 @@ export const replyNotificationPostbackTemp = async ({
 
 }: ReplyNotificationPostbackTemp) => {
     try {
+        const contents = getRedAlertTemplate({
+            title: 'แจ้งอุณหภูมิร่างกายสูง',
+            message,
+            postbackData: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
+            showConsentNote: true,
+        });
+
         const requestData = {
             to: replyToken,
             messages: [
                 {
                     type: "flex",
                     altText: "แจ้งเตือน",
-                    contents: {
-                        type: "bubble",
-                        body: {
-                            type: "box",
-                            layout: "vertical",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "แจ้งอุณหภูมิร่างกายสูง",
-                                            color: "#FC0303",
-                                            size: "xl",
-                                            weight: "bold",
-                                            decoration: "none"
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xxl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "separator",
-                                    margin: "md"
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: message,
-                                            color: "#555555",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "button",
-                                    style: "primary",
-                                    height: "sm",
-                                    margin: "xxl",
-                                    action: {
-                                        type: "postback",
-                                        label: "ส่งขอความช่วยเหลือเพิ่มเติม",
-                                        data: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
-                                    }
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                                            color: "#FC0303",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                            ]
-                        }
-                    }
+                    contents
                 }
             ],
         };
@@ -1674,102 +1618,20 @@ export const replyNotificationPostbackfall = async ({
 
 }: ReplyNotificationPostbackfall) => {
     try {
+        const contents = getRedAlertTemplate({
+            title: 'แจ้งเตือนการล้ม',
+            message,
+            postbackData: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
+            showConsentNote: true,
+        });
+
         const requestData = {
             to: replyToken,
             messages: [
                 {
                     type: "flex",
                     altText: "แจ้งเตือน",
-                    contents: {
-                        type: "bubble",
-                        body: {
-                            type: "box",
-                            layout: "vertical",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "แจ้งเตือนการล้ม",
-                                            color: "#FC0303",
-                                            size: "xl",
-                                            weight: "bold",
-                                            decoration: "none"
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xxl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "separator",
-                                    margin: "md"
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: message,
-                                            color: "#555555",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "button",
-                                    style: "primary",
-                                    height: "sm",
-                                    margin: "xxl",
-                                    action: {
-                                        type: "postback",
-                                        label: "ส่งขอความช่วยเหลือเพิ่มเติม",
-                                        data: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
-                                    }
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                                            color: "#FC0303",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                            ]
-                        }
-                    }
+                    contents
                 }
             ],
         };
@@ -1790,102 +1652,20 @@ export const replyNotificationPostbackHeart = async ({
 
 }: ReplyNotificationPostbackHeart) => {
     try {
+        const contents = getRedAlertTemplate({
+            title: 'แจ้งเตือนชีพจร',
+            message,
+            postbackData: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
+            showConsentNote: true,
+        });
+
         const requestData = {
             to: replyToken,
             messages: [
                 {
                     type: "flex",
                     altText: "แจ้งเตือน",
-                    contents: {
-                        type: "bubble",
-                        body: {
-                            type: "box",
-                            layout: "vertical",
-                            contents: [
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "แจ้งเตือนชีพจร",
-                                            color: "#FC0303",
-                                            size: "xl",
-                                            weight: "bold",
-                                            decoration: "none"
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xxl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "separator",
-                                    margin: "md"
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: message,
-                                            color: "#555555",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: "button",
-                                    style: "primary",
-                                    height: "sm",
-                                    margin: "xxl",
-                                    action: {
-                                        type: "postback",
-                                        label: "ส่งขอความช่วยเหลือเพิ่มเติม",
-                                        data: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
-                                    }
-                                },
-                                {
-                                    type: "text",
-                                    text: " ",
-                                    wrap: true,
-                                    lineSpacing: "5px",
-                                    margin: "md",
-                                    contents: [
-                                        {
-                                            type: "span",
-                                            text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                                            color: "#FC0303",
-                                            size: "md",
-                                            // decoration: "none",
-                                            // wrap      : true
-                                        },
-                                        {
-                                            type: "span",
-                                            text: " ",
-                                            size: "xl",
-                                            decoration: "none"
-                                        }
-                                    ]
-                                },
-                            ]
-                        }
-                    }
+                    contents
                 }
             ],
         };
