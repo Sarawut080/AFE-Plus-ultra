@@ -329,7 +329,7 @@ export const getFlexTemplate = (
                         type: "span",
                         text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
                         color: "#ff0000",
-                        size: "md",
+                        size: "sm",
                         // decoration: "none",
                         // wrap      : true
                     }
@@ -1428,8 +1428,8 @@ export const replyNotificationPostback = async ({
                                         {
                                             type: "span",
                                             text: "*หมาย: ข้าพเจ้ายินยอมเปิดเผยข้อมูลตำแหน่งปัจจุบันของผู้ที่มีภาวะพึ่งพิง",
-                                            color: "#484848",
-                                            size: "md",
+                                            color: "#ff0000",
+                                            size: "sm",
                                             // decoration: "none",
                                             // wrap      : true
                                         },
