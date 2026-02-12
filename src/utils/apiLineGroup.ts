@@ -199,11 +199,12 @@ export const replyNotification = async ({
                                     {
                                         type: 'button',
                                         style: 'primary',
+                                        color: '#555555',
                                         height: 'sm',
                                         margin: 'xxl',
                                         action: {
                                             type: 'postback',
-                                            label: 'ตอบรับเคสช่วยเหลือ',
+                                            label: 'รับเคสช่วยเหลือ',
                                             data: `type=accept&takecareId=${resTakecareperson.takecare_id}&extenId=${extendedHelpId}&userLineId=${resUser.users_line_id}`,
                                         },
                                     },
@@ -318,6 +319,7 @@ export const replyNoti = async ({
                                 ...buttons.map((b) => ({
                                     type: "button",
                                     style: "primary",
+                                    color: '#555555',
                                     height: "sm",
                                     margin: "md",
                                     action:
