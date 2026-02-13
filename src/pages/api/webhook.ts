@@ -193,11 +193,16 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             const result = await postbackSafezone({ userLineId: postback.userLineId, takecarepersonId: Number(postback.takecarepersonId) });
             console.log("Result for Safezone: ", result);
 
-            if (result === "already_sent") {
-              // ✅ มีเคสเปิดอยู่แล้ว → ไม่ส่งซ้ำ
-              console.log("Case already open, skipping duplicate notification.");
+            // ✅ [แก้ไขส่วนนี้] เพิ่มการตอบกลับผู้ใช้ตามสถานะ
+            if (result === "in_progress") {
+               // กรณีมีการตอบรับเคสแล้ว
+               await replyMessage({ replyToken, message: 'ขณะนี้เจ้าหน้าที่ได้รับเรื่องและกำลังดำเนินการช่วยเหลือแล้ว ไม่สามารถส่งคำขอซ้ำได้' });
+            } else if (result === "already_sent") {
+               // กรณีส่งไปแล้ว แต่ยังไม่มีคนกดรับ
+               await replyMessage({ replyToken, message: 'คุณได้ส่งคำขอความช่วยเหลือไปแล้ว กรุณารอเจ้าหน้าที่ตอบรับ' });
             } else if (result) {
-              await replyNotification({ replyToken: result, message: 'ส่งคำขอความช่วยเหลือแล้ว' });
+               // กรณีสร้างเคสใหม่สำเร็จ
+               await replyNotification({ replyToken: result, message: 'ส่งคำขอความช่วยเหลือแล้ว' });
             }
           } else if (postback.type === 'accept') {
             console.log("Accept Postback Triggered: ", postback);

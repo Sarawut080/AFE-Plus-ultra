@@ -263,78 +263,84 @@ export const postbackTemp = async ({
 
 //
 export const postbackSafezone = async ({
-    userLineId,
-    takecarepersonId,
+  userLineId,
+  takecarepersonId,
 }: PostbackSafezoneProps) => {
-    try {
-        const resUser = await api.getUser(userLineId);
-        const resTakecareperson = await api.getTakecareperson(
-            takecarepersonId.toString()
+  try {
+    const resUser = await api.getUser(userLineId);
+    const resTakecareperson = await api.getTakecareperson(
+      takecarepersonId.toString()
+    );
+
+    if (resUser && resTakecareperson) {
+      const resSafezone = await api.getSafezone(
+        resTakecareperson.takecare_id,
+        resUser.users_id
+      );
+      if (resSafezone) {
+        const resExtendedHelp = await api.getExtendedHelp(
+          resTakecareperson.takecare_id,
+          resUser.users_id
         );
 
-        if (resUser && resTakecareperson) {
-            const resSafezone = await api.getSafezone(
-                resTakecareperson.takecare_id,
-                resUser.users_id
-            );
-            if (resSafezone) {
-                const resExtendedHelp = await api.getExtendedHelp(
-                    resTakecareperson.takecare_id,
-                    resUser.users_id
-                );
+        // ✅ [แก้ไขส่วนนี้] เช็คว่ามีเคสที่ยังไม่ปิดอยู่
+        if (
+          resExtendedHelp &&
+          !resExtendedHelp.exted_closed_date
+        ) {
+          console.log(
+            `Safezone case still open. exten_id: ${resExtendedHelp.exten_id}`
+          );
+          
+          // เช็คเพิ่ม: ถ้ามีการตอบรับเคสแล้ว (มี user รับเคส หรือมีวันที่รับเคส)
+          if (resExtendedHelp.exten_received_date || resExtendedHelp.exten_received_user_id) {
+             return "in_progress"; // สถานะ: มีคนรับเคสแล้ว กำลังดำเนินการ
+          }
 
-                // ✅ เช็คว่ามีเคสที่ยังไม่ปิดอยู่ → ส่งซ้ำไม่ได้
-                if (
-                    resExtendedHelp &&
-                    !resExtendedHelp.exted_closed_date
-                ) {
-                    console.log(
-                        `Safezone case still open. exten_id: ${resExtendedHelp.exten_id}`
-                    );
-                    return "already_sent";
-                }
-
-                // ไม่มีเคส หรือเคสเดิมปิดแล้ว → สร้างใหม่
-                let extendedHelpId = null;
-                const data = {
-                    takecareId: resTakecareperson.takecare_id,
-                    usersId: resUser.users_id,
-                    typeStatus: "save",
-                    safezLatitude: resSafezone.safez_latitude,
-                    safezLongitude: resSafezone.safez_longitude,
-                };
-                const resExtendedHelpId = await api.saveExtendedHelp(data);
-                extendedHelpId = resExtendedHelpId;
-
-                const responeLocation = await getLocation(
-                    resTakecareperson.takecare_id,
-                    resUser.users_id,
-                    resSafezone.safezone_id
-                );
-
-                await replyNotification({
-                    resUser,
-                    resTakecareperson,
-                    resSafezone,
-                    extendedHelpId,
-                    locationData: responeLocation,
-                });
-                return resUser.users_line_id;
-            } else {
-                console.log(
-                    `NO SAFEZONE FOUND for takecare_id: ${resTakecareperson.takecare_id}, users_id: ${resUser.users_id}`
-                );
-            }
-        } else {
-            console.log(
-                `USER or TAKECAREPERSON NOT FOUND. userLineId: ${userLineId}, takecarepersonId: ${takecarepersonId}`
-            );
+          return "already_sent"; // สถานะ: ส่งไปแล้ว รอคนรับ
         }
-        return null;
-    } catch (error) {
-        console.log("🚀 ~ postbackSafezone ~ error:", error);
-        return null;
+
+        // ไม่มีเคส หรือเคสเดิมปิดแล้ว → สร้างใหม่
+        let extendedHelpId = null;
+        const data = {
+          takecareId: resTakecareperson.takecare_id,
+          usersId: resUser.users_id,
+          typeStatus: "save",
+          safezLatitude: resSafezone.safez_latitude,
+          safezLongitude: resSafezone.safez_longitude,
+        };
+        const resExtendedHelpId = await api.saveExtendedHelp(data);
+        extendedHelpId = resExtendedHelpId;
+
+        const responeLocation = await getLocation(
+          resTakecareperson.takecare_id,
+          resUser.users_id,
+          resSafezone.safezone_id
+        );
+
+        await replyNotification({
+          resUser,
+          resTakecareperson,
+          resSafezone,
+          extendedHelpId,
+          locationData: responeLocation,
+        });
+        return resUser.users_line_id;
+      } else {
+        console.log(
+          `NO SAFEZONE FOUND for takecare_id: ${resTakecareperson.takecare_id}, users_id: ${resUser.users_id}`
+        );
+      }
+    } else {
+      console.log(
+        `USER or TAKECAREPERSON NOT FOUND. userLineId: ${userLineId}, takecarepersonId: ${takecarepersonId}`
+      );
     }
+    return null;
+  } catch (error) {
+    console.log("🚀 ~ postbackSafezone ~ error:", error);
+    return null;
+  }
 };
 
 export const postbackAccept = async (data: any) => {
