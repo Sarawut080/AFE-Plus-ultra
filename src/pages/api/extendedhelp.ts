@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
 import axios from "axios";
@@ -35,9 +34,11 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 where: {
                     takecare_id           : Number(takecareId),
                     user_id               : Number(usersId),
-                    exten_received_user_id: null,
-                    exten_received_date   : null,
-                }
+                    exted_closed_date     : null,
+                },
+                orderBy: {
+                    exten_date: 'desc'
+                },
             })
             return res.status(200).json({ message: 'success', data: extendedhelp })
         } catch (error) {

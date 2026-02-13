@@ -1,6 +1,7 @@
 ﻿import { encrypt, parseQueryString } from "@/utils/helpers";
 import * as api from "@/lib/listAPI";
 import axios from "axios";
+import prisma from "@/lib/prisma";
 
 import { replyNotification, replyNoti } from "@/utils/apiLineGroup";
 
@@ -8,6 +9,17 @@ interface PostbackSafezoneProps {
     userLineId: string;
     takecarepersonId: number;
 }
+
+const getActiveExtendedHelp = async (takecareId: number, usersId: number) => {
+    return prisma.extendedhelp.findFirst({
+        where: {
+            takecare_id: Number(takecareId),
+            user_id: Number(usersId),
+            exted_closed_date: null,
+        },
+        orderBy: { exten_date: "desc" },
+    });
+};
 
 const getLocation = async (
     takecare_id: number,
@@ -40,7 +52,7 @@ export const postbackHeartRate = async ({
                 resUser.users_id
             );
             if (resSafezone) {
-                const resExtendedHelp = await api.getExtendedHelp(
+                const resExtendedHelp = await getActiveExtendedHelp(
                     resTakecareperson.takecare_id,
                     resUser.users_id
                 );
@@ -118,7 +130,7 @@ export const postbackFall = async ({
                 resUser.users_id
             );
             if (resSafezone) {
-                const resExtendedHelp = await api.getExtendedHelp(
+                const resExtendedHelp = await getActiveExtendedHelp(
                     resTakecareperson.takecare_id,
                     resUser.users_id
                 );
@@ -198,7 +210,7 @@ export const postbackTemp = async ({
                 resUser.users_id
             );
             if (resSafezone) {
-                const resExtendedHelp = await api.getExtendedHelp(
+                const resExtendedHelp = await getActiveExtendedHelp(
                     resTakecareperson.takecare_id,
                     resUser.users_id
                 );
@@ -278,7 +290,7 @@ export const postbackSafezone = async ({
                 resUser.users_id
             );
             if (resSafezone) {
-                const resExtendedHelp = await api.getExtendedHelp(
+                const resExtendedHelp = await getActiveExtendedHelp(
                     resTakecareperson.takecare_id,
                     resUser.users_id
                 );
