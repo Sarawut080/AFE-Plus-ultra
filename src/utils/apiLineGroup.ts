@@ -379,7 +379,7 @@ export const replySafezoneBackMessage = async ({
                                             {
                                                 type: 'span',
                                                 text: 'แจ้งเตือนกลับเข้าเขต',
-                                                color: '#FC0303',
+                                                color: '#000000',
                                                 size: 'xl',
                                                 weight: 'bold',
                                                 decoration: 'none'
@@ -416,7 +416,7 @@ export const replySafezoneBackMessage = async ({
                                     {
                                         type: 'text',
                                         text: 'ผู้มีภาวะพึ่งพิงได้กลับเข้าเขตปลอดภัยแล้ว',
-                                        size: 'sm',
+                                        size: 'xl',
                                         color: '#2CD435',
                                         weight: 'bold',
                                         wrap: true,
