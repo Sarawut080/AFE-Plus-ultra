@@ -51,6 +51,19 @@ interface ReplyNotiButton {
     text?: string;
 }
 
+interface ReplySafezoneBackMessage {
+    resUser          : {
+        users_fname : string;
+        users_sname : string;
+        users_tel1  : string;
+    };
+    resTakecareperson: {
+        takecare_fname: string;
+        takecare_sname: string;
+        takecare_tel1 : string;
+    };
+}
+
 export const getUserProfile = async (userId: string) => {
     try {
         const response = await axios.get(`${LINE_PROFILE_API}/${userId}`, { headers: LINE_HEADER });
@@ -322,6 +335,133 @@ export const replyNoti = async ({
         console.log('✅ Reply notification sent successfully to:', replyToken);
     } catch (error: any) {
         console.log("❌ REPLY NOTI ERROR", error?.response?.status, error?.response?.data, error?.message);
+        throw error;
+    }
+}
+
+export const replySafezoneBackMessage = async ({
+    resUser,
+    resTakecareperson,
+}: ReplySafezoneBackMessage) => {
+    try {
+        // ค้นหากลุ่มที่เปิดใช้งานจากฐานข้อมูล
+        const groupLine = await prisma.groupLine.findFirst({
+            where: {
+                group_status: 1,
+            },
+        });
+
+        if (groupLine) {
+            const groupLineId = groupLine.group_line_id;
+
+            // ตรวจสอบและทำความสะอาดข้อมูล
+            const userFullName = `${resUser.users_fname || ''} ${resUser.users_sname || ''}`.trim() || 'ไม่ระบุชื่อ';
+            const userTel = resUser.users_tel1 || '0000000000';
+            const takecareFullName = `${resTakecareperson.takecare_fname || ''} ${resTakecareperson.takecare_sname || ''}`.trim() || 'ไม่ระบุชื่อ';
+            const takecareTel = resTakecareperson.takecare_tel1 || '-';
+
+            const requestData = {
+                to: groupLineId,
+                messages: [
+                    {
+                        type: 'flex',
+                        altText: 'แจ้งเตือนกลับเข้าเขต',
+                        contents: {
+                            type: 'bubble',
+                            body: {
+                                type: 'box',
+                                layout: 'vertical',
+                                contents: [
+                                    {
+                                        type: 'text',
+                                        text: 'แจ้งเตือนกลับเข้าเขต',
+                                        contents: [
+                                            {
+                                                type: 'span',
+                                                text: 'แจ้งเตือนกลับเข้าเขต',
+                                                color: '#FC0303',
+                                                size: 'xl',
+                                                weight: 'bold',
+                                                decoration: 'none'
+                                            }
+                                        ],
+                                        align: 'center'
+                                    },
+                                    {
+                                        type: 'separator',
+                                        margin: 'md'
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: 'ข้อมูลผู้มีภาวะพึ่งพิง',
+                                        size: 'md',
+                                        color: '#555555',
+                                        wrap: true,
+                                        margin: 'sm',
+                                    },
+                                    {
+                                        type: 'box',
+                                        layout: 'vertical',
+                                        margin: 'md',
+                                        spacing: 'sm',
+                                        contents: [
+                                            layoutBoxBaseline('ชื่อ-สกุล', takecareFullName, 4, 5),
+                                            layoutBoxBaseline('เบอร์โทร', takecareTel, 4, 5),
+                                        ],
+                                    },
+                                    {
+                                        type: 'separator',
+                                        margin: 'md'
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: 'ผู้มีภาวะพึ่งพิงได้กลับเข้าเขตปลอดภัยแล้ว',
+                                        size: 'sm',
+                                        color: '#2CD435',
+                                        weight: 'bold',
+                                        wrap: true,
+                                        margin: 'xl',
+                                        align: 'center'
+                                    },
+                                    {
+                                        type: 'separator',
+                                        margin: 'md'
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '*กรุณาโทรตรวจสอบกับผู้ดูแล',
+                                        size: 'xs',
+                                        color: '#555555',
+                                        wrap: true,
+                                        margin: 'md',
+                                    },
+                                    {
+                                        type: 'button',
+                                        style: 'primary',
+                                        height: 'sm',
+                                        margin: 'lg',
+                                        color: '#ff0000',
+                                        action: {
+                                            type: 'uri',
+                                            label: 'โทรฉุกเฉินหาผู้ดูแล',
+                                            uri: `tel:${userTel}`
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+            };
+
+            // ส่งข้อความไปยังกลุ่ม
+            await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers: LINE_HEADER });
+            console.log('✅ Safezone back message sent successfully to group:', groupLineId);
+        } else {
+            console.log('❌ ไม่พบกลุ่มไลน์ที่ต้องการส่งข้อความไป');
+        }
+    } catch (error: any) {
+        console.log("❌ SAFEZONE BACK MESSAGE ERROR", error?.response?.status, error?.response?.data, error?.message);
         throw error;
     }
 }
