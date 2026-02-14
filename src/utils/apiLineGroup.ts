@@ -26,7 +26,7 @@ interface ReplyNotification {
         takecare_tel1: string;
         takecare_id: number;
     };
-    resSafezone: {};
+    resSafezone      : any;
     extendedHelpId: number;
     locationData: {
         locat_latitude: string;
@@ -218,6 +218,18 @@ export const replyNotification = async ({
                                             layoutBoxBaseline('ชื่อ-สกุล', takecareFullName, 4, 5),
                                             layoutBoxBaseline('เบอร์โทร', takecareTel, 4, 5),
                                         ],
+                                    },
+                                    {
+                                        type: 'button',
+                                        style: 'secondary',
+                                        height: 'sm',
+                                        margin: 'xxl',
+                                        color: '#007AFF',
+                                        action: {
+                                            type: 'uri',
+                                            label: 'ดูแผนที่/นำทาง',
+                                            uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser.users_line_id}`
+                                        }
                                     },
                                     {
                                         type: 'button',
