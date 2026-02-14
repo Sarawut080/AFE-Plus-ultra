@@ -400,7 +400,7 @@ export const postbackAccept = async (data: any) => {
                         titleColor: "#1976D2",
                         message: isAcceptCallFlow
                             ? "ข้อมูลผู้มีภาวะพึ่งพิง"
-                            : "",
+                            : "รับเคสช่วยเหลือแล้ว",
                         ...(isAcceptCallFlow
                             ? {
                                   detailRows: [
