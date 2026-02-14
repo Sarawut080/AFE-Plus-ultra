@@ -388,11 +388,11 @@ export const postbackAccept = async (data: any) => {
                     const closeCasePostbackDataManual = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}&closeType=manual`;
                     // แบบที่ 3: ปิดเคสทางหน้าเว็บ
                     const closeCasePostbackDataAuto = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}&closeType=auto`;
-                    
+
                     const isAcceptCallFlow = data.acceptMode === "accept_call";
                     let dependentFullName = "-";
                     let dependentTel = "-";
-                    
+
                     if (isAcceptCallFlow) {
                         const dependentUser = await prisma.users.findFirst({
                             where: { users_id: Number(resExtendedHelp.user_id) },
@@ -413,38 +413,38 @@ export const postbackAccept = async (data: any) => {
                             : "รับเคสช่วยเหลือแล้ว",
                         ...(isAcceptCallFlow
                             ? {
-                                  detailRows: [
-                                      { label: "ชื่อ-สกุล", value: dependentFullName },
-                                      { label: "เบอร์โทร", value: dependentTel },
-                                  ],
-                              }
+                                detailRows: [
+                                    { label: "ชื่อ-สกุล", value: dependentFullName },
+                                    { label: "เบอร์โทร", value: dependentTel },
+                                ],
+                            }
                             : {}),
                         ...(isAcceptCallFlow
                             ? {
-                                  // ✨ กรณี LIFF: แสดง 2 ปุ่มใหม่
-                                  buttons: [
-                                      {
-                                          type: "postback",
-                                          label: "ปิดเคสอัตโนมัติ",
-                                          data: closeCasePostbackDataAuto,
-                                      },
-                                      {
-                                          type: "postback",
-                                          label: "ปิดเคสด้วยตัวเอง",
-                                          data: closeCasePostbackDataManual,
-                                      },
-                                  ],
-                              }
+                                // ✨ กรณี LIFF: แสดง 2 ปุ่มใหม่
+                                buttons: [
+                                    {
+                                        type: "postback",
+                                        label: "ปิดเคสอัตโนมัติ",
+                                        data: closeCasePostbackDataAuto,
+                                    },
+                                    {
+                                        type: "postback",
+                                        label: "ปิดเคสด้วยตัวเอง",
+                                        data: closeCasePostbackDataManual,
+                                    },
+                                ],
+                            }
                             : {
-                                  // ✨ กรณีปกติ: แสดงปุ่มเดิม 1 ปุ่ม
-                                  buttons: [
-                                      {
-                                          type: "postback",
-                                          label: "ปิดเคสช่วยเหลือ",
-                                          data: closeCasePostbackDataNormal,
-                                      },
-                                  ],
-                              }),
+                                // ✨ กรณีปกติ: แสดงปุ่มเดิม 1 ปุ่ม
+                                buttons: [
+                                    {
+                                        type: "postback",
+                                        label: "ปิดเคสช่วยเหลือ",
+                                        data: closeCasePostbackDataNormal,
+                                    },
+                                ],
+                            }),
                     });
                     return data.userLineId;
                 }
@@ -519,7 +519,7 @@ export const postbackClose = async (data: any) => {
 
         // ✨ ตรวจสอบ closeType และเลือก message ที่เหมาะสม
         const closeType = data.closeType; // ไม่ใส่ default เพื่อให้รู้ว่าไม่มี closeType
-        
+
         if (closeType === "manual") {
             // ✨ แบบที่ 2: ปิดเคสด้วยตัวเอง
             await replyNoti({
@@ -541,8 +541,14 @@ export const postbackClose = async (data: any) => {
             });
             console.log(`✅ Case ${data.extenId} closed via web by user: ${resUser.users_id}`);
         } else {
-            // ✨ แบบที่ 1: ปกติ (ไม่มี closeType) - ไม่ส่ง replyNoti ที่นี่
-            // เพราะจะส่งผ่าน replyNotification ใน webhook
+            // ✨ แบบที่ 1: ปกติ - ส่ง replyNoti แทน replyNotification
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "สถานะเคส",
+                titleColor: "#1976D2",
+                message: "ปิดเคสขอความช่วยเหลือแล้ว",
+            });
             console.log(`✅ Case ${data.extenId} closed (normal) by user: ${resUser.users_id}`);
         }
 

@@ -225,13 +225,6 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             const replyToken = await postbackClose(data);
             console.log("Reply Token for Close: ", replyToken);
 
-            // ✨ ส่ง replyNotification เฉพาะกรณีปกติ (ไม่มี closeType)
-            if (replyToken && !postback.closeType) {
-              await replyNotification({
-                replyToken,
-                message: 'ปิดเคสขอความช่วยเหลือแล้ว'
-              });
-            }
           }
         }
 
