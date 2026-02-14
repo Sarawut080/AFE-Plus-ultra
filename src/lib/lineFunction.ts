@@ -380,10 +380,19 @@ export const postbackAccept = async (data: any) => {
                         typeStatus: "received",
                         extenReceivedUserId: resUser.users_id,
                     });
-                    const closeCasePostbackData = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}`;
+
+                    // ✨ สร้าง postback data 3 แบบ
+                    // แบบที่ 1: ปกติ (ไม่มี closeType)
+                    const closeCasePostbackDataNormal = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}`;
+                    // แบบที่ 2: ปิดเคสด้วยตัวเอง
+                    const closeCasePostbackDataManual = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}&closeType=manual`;
+                    // แบบที่ 3: ปิดเคสทางหน้าเว็บ
+                    const closeCasePostbackDataAuto = `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}&closeType=auto`;
+                    
                     const isAcceptCallFlow = data.acceptMode === "accept_call";
                     let dependentFullName = "-";
                     let dependentTel = "-";
+                    
                     if (isAcceptCallFlow) {
                         const dependentUser = await prisma.users.findFirst({
                             where: { users_id: Number(resExtendedHelp.user_id) },
@@ -393,6 +402,7 @@ export const postbackAccept = async (data: any) => {
                             dependentTel = dependentUser.users_tel1 || dependentUser.users_tel_home || "-";
                         }
                     }
+
                     await replyNoti({
                         replyToken: data.groupId,
                         userIdAccept: data.userIdAccept,
@@ -411,25 +421,27 @@ export const postbackAccept = async (data: any) => {
                             : {}),
                         ...(isAcceptCallFlow
                             ? {
+                                  // ✨ กรณี LIFF: แสดง 2 ปุ่มใหม่
                                   buttons: [
                                       {
                                           type: "postback",
-                                          label: "ปิดเคสอัตโนมัติ",
-                                          data: closeCasePostbackData,
+                                          label: "ปิดเคสทางหน้าเว็บ",
+                                          data: closeCasePostbackDataAuto,
                                       },
                                       {
                                           type: "postback",
                                           label: "ปิดเคสด้วยตัวเอง",
-                                          data: closeCasePostbackData,
+                                          data: closeCasePostbackDataManual,
                                       },
                                   ],
                               }
                             : {
+                                  // ✨ กรณีปกติ: แสดงปุ่มเดิม 1 ปุ่ม
                                   buttons: [
                                       {
                                           type: "postback",
                                           label: "ปิดเคสช่วยเหลือ",
-                                          data: closeCasePostbackData,
+                                          data: closeCasePostbackDataNormal,
                                       },
                                   ],
                               }),
@@ -451,55 +463,92 @@ export const postbackClose = async (data: any) => {
             await replyNoti({
                 replyToken: data.groupId,
                 userIdAccept: data.userIdAccept,
-                message: "ไม่พบข้อมูลของคุณไม่สามารถปิดเคสได้",
+                title: "ไม่สามารถปิดเคสได้",
+                titleColor: "#ff0000",
+                message: "ไม่พบข้อมูลของคุณในระบบ",
             });
             return null;
-        } else {
-            const resExtendedHelp = await api.getExtendedHelpById(data.extenId);
-            if (resExtendedHelp) {
-                if (
-                    resExtendedHelp.exted_closed_date &&
-                    resExtendedHelp.exten_closed_user_id
-                ) {
-                    await replyNoti({
-                        replyToken: data.groupId,
-                        userIdAccept: data.userIdAccept,
-                        title: "สถานะเคส",
-                        titleColor: "#1976D2",
-                        message: "มีผู้ปิดเคสช่วยเหลือแล้ว",
-                    });
-                    return null;
-                }
-                if (
-                    !resExtendedHelp.exten_received_date &&
-                    !resExtendedHelp.exten_received_user_id
-                ) {
-                    await replyNoti({
-                        replyToken: data.groupId,
-                        userIdAccept: data.userIdAccept,
-                        message:
-                            "ไม่สามารถปิดเคสได้ เนื่องจากยังไม่ได้ตอบรับการช่วยเหลือ",
-                    });
-                    return null;
-                } else {
-                    await api.updateExtendedHelp({
-                        extenId: data.extenId,
-                        typeStatus: "close",
-                        extenClosedUserId: resUser.users_id,
-                    });
-                    await replyNoti({
-                        replyToken: data.groupId,
-                        userIdAccept: data.userIdAccept,
-                        title: "สถานะเคส",
-                        titleColor: "#1976D2",
-                        message: "ปิดเคสช่วยเหลือแล้ว",
-                    });
-                    return data.userLineId;
-                }
-            }
         }
-        return null;
+
+        const resExtendedHelp = await api.getExtendedHelpById(data.extenId);
+        if (!resExtendedHelp) {
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "ไม่พบข้อมูลเคส",
+                titleColor: "#ff0000",
+                message: "ไม่พบข้อมูลเคสช่วยเหลือนี้ในระบบ",
+            });
+            return null;
+        }
+
+        if (
+            resExtendedHelp.exted_closed_date &&
+            resExtendedHelp.exten_closed_user_id
+        ) {
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "สถานะเคส",
+                titleColor: "#1976D2",
+                message: "มีผู้ปิดเคสช่วยเหลือแล้ว",
+            });
+            return null;
+        }
+
+        if (
+            !resExtendedHelp.exten_received_date &&
+            !resExtendedHelp.exten_received_user_id
+        ) {
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "ไม่สามารถปิดเคสได้",
+                titleColor: "#ff0000",
+                message: "ไม่สามารถปิดเคสได้ เนื่องจากยังไม่ได้ตอบรับการช่วยเหลือ",
+            });
+            return null;
+        }
+
+        // อัพเดทสถานะปิดเคส
+        await api.updateExtendedHelp({
+            extenId: data.extenId,
+            typeStatus: "close",
+            extenClosedUserId: resUser.users_id,
+        });
+
+        // ✨ ตรวจสอบ closeType และเลือก message ที่เหมาะสม
+        const closeType = data.closeType; // ไม่ใส่ default เพื่อให้รู้ว่าไม่มี closeType
+        
+        if (closeType === "manual") {
+            // ✨ แบบที่ 2: ปิดเคสด้วยตัวเอง
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "สถานะเคส",
+                titleColor: "#2CD435",
+                message: "ปิดเคสขอความช่วยเหลือด้วยตนเองแล้ว",
+            });
+            console.log(`✅ Case ${data.extenId} closed manually by user: ${resUser.users_id}`);
+        } else if (closeType === "auto") {
+            // ✨ แบบที่ 3: ปิดเคสทางหน้าเว็บ
+            await replyNoti({
+                replyToken: data.groupId,
+                userIdAccept: data.userIdAccept,
+                title: "สถานะเคส",
+                titleColor: "#2CD435",
+                message: "ปิดเคสขอความช่วยเหลือทางหน้าเว็บแล้ว",
+            });
+            console.log(`✅ Case ${data.extenId} closed via web by user: ${resUser.users_id}`);
+        } else {
+            // ✨ แบบที่ 1: ปกติ (ไม่มี closeType) - ไม่ส่ง replyNoti ที่นี่
+            // เพราะจะส่งผ่าน replyNotification ใน webhook
+            console.log(`✅ Case ${data.extenId} closed (normal) by user: ${resUser.users_id}`);
+        }
+
+        return data.userLineId;
     } catch (error) {
+        console.error("❌ postbackClose error:", error);
         return error;
     }
 };
